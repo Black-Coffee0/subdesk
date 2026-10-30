@@ -1,0 +1,13 @@
+node_modules
+.next
+.data
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+next-env.d.ts
+coverage
+
+# end-to-end test output
+e2e/shots
+.seed.txt

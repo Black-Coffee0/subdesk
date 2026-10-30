@@ -1,0 +1,49 @@
+# Render Blueprint: one web service plus one PostgreSQL database.
+# Use: Render dashboard > New > Blueprint > pick the Git repository that holds this project.
+#
+# NOT TESTED on Render from the environment this was written in. Check the first deploy log.
+#
+# Free plans are fine for a trial but have limits (the web service sleeps when idle, and the free database
+# is not meant to keep real data for long). Change both `plan:` lines to a paid plan before real users
+# or real wallet balances depend on it.
+services:
+  - type: web
+    name: subdesk
+    runtime: node
+    plan: free
+    region: singapore
+    # --include=dev because the build needs TypeScript and Tailwind, which are dev dependencies.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        fromDatabase:
+          name: subdesk-db
+          property: connectionString
+      # Applies pending migrations when the server starts (the free plan has no shell to run them by hand).
+      - key: AUTO_MIGRATE
+        value: "true"
+      # Without SMTP no email can be sent, so verification is off until you set SMTP_URL and turn this back on.
+      - key: EMAIL_VERIFICATION_REQUIRED
+        value: "false"
+      # Set to your public https address after the first deploy, for example https://subdesk.onrender.com
+      - key: APP_URL
+        sync: false
+      - key: SMTP_URL
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        sync: false
+
+databases:
+  - name: subdesk-db
+    plan: free
+    region: singapore
